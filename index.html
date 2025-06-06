@@ -32,6 +32,29 @@
       min-height: 100vh;
       z-index: 1;
     }
+    #music-toggle {
+      position: fixed;
+      top: 18px;
+      right: 24px;
+      z-index: 50;
+      background: var(--glass);
+      border: 2px solid var(--green);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 0.48em 1.3em;
+      font-family: 'Orbitron', monospace, sans-serif;
+      font-size: 1em;
+      box-shadow: 0 0 10px var(--green), 0 0 8px var(--pink);
+      cursor: pointer;
+      transition: background 0.13s, color 0.13s, border 0.13s;
+      backdrop-filter: blur(8px);
+    }
+    #music-toggle.muted {
+      border-color: var(--red);
+      color: var(--red);
+      box-shadow: 0 0 14px var(--red), 0 0 10px var(--pink);
+      background: rgba(30,10,30,0.7);
+    }
     /* Cybernetic grid background */
     #cyber-bg {
       position: fixed;
@@ -187,10 +210,14 @@
     @media (max-width: 600px) {
       .glass-container { padding: 1em 0.7em; }
       .avatar { width: 98px; height: 98px; }
+      #music-toggle { top: 6px; right: 6px; font-size: .98em; padding: 0.38em 0.7em; }
     }
   </style>
 </head>
 <body>
+  <button id="music-toggle" aria-pressed="false" aria-label="Mute background music">🔊 Music</button>
+  <!-- Background music (replace src with your own music URL if desired) -->
+  <audio id="bg-music" src="https://cdn.pixabay.com/audio/2023/03/16/audio_12b1746b4a.mp3" loop autoplay></audio>
   <div id="cyber-bg"></div>
   <canvas id="particles"></canvas>
   <main class="glass-container">
@@ -235,7 +262,6 @@
         <a href="https://github.com/Pkdriller" target="_blank" rel="noopener" title="My GitHub">GitHub</a>
         <a href="https://linkedin.com/in/benard-wachira" target="_blank" rel="noopener" title="LinkedIn">LinkedIn</a>
         <a href="https://twitter.com/pkdriller" target="_blank" rel="noopener" title="Twitter/X">Twitter</a>
-        <!-- Add more links as desired -->
       </div>
     </section>
     <section class="cyber-card">
@@ -252,6 +278,38 @@
     &copy; 2025 Thanks  &mdash; for visiting all rights <span style="color:var(--pink)">reserved</span> coded; <span style="color:var(--green)">with❤️</span> love.
   </div>
   <script>
+    // MUSIC CONTROLLER
+    const music = document.getElementById('bg-music');
+    const musicToggle = document.getElementById('music-toggle');
+    // Ensure autoplay on some browsers
+    music.volume = 0.4;
+    function setMusicButton() {
+      if (music.muted || music.paused) {
+        musicToggle.innerHTML = "🔇 Music Off";
+        musicToggle.classList.add('muted');
+        musicToggle.setAttribute('aria-pressed', 'true');
+      } else {
+        musicToggle.innerHTML = "🔊 Music";
+        musicToggle.classList.remove('muted');
+        musicToggle.setAttribute('aria-pressed', 'false');
+      }
+    }
+    musicToggle.addEventListener('click', function() {
+      music.muted = !music.muted;
+      if (music.muted) music.pause();
+      else { music.play().catch(()=>{}); }
+      setMusicButton();
+    });
+    // In case autoplay is blocked, set music button on play/pause
+    music.addEventListener('play', setMusicButton);
+    music.addEventListener('pause', setMusicButton);
+    music.addEventListener('volumechange', setMusicButton);
+    // Try to start playing if user interacts anywhere
+    document.body.addEventListener('pointerdown', () => {
+      if (music.paused && !music.muted) music.play().catch(()=>{});
+    }, { once: true });
+    setMusicButton();
+
     // Holographic/cybernetic particles (stars, matrix rain, etc)
     const canvas = document.getElementById('particles');
     const ctx = canvas.getContext('2d');
@@ -322,4 +380,4 @@
     });
   </script>
 </body>
-  </html>
+    </html>
